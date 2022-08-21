@@ -1,4 +1,7 @@
 from datetime import datetime
+import enum
+import re
+from xml.dom import ValidationErr
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
 from wtforms.validators import DataRequired, AnyOf, URL
@@ -15,7 +18,34 @@ class ShowForm(Form):
         validators=[DataRequired()],
         default= datetime.today()
     )
+# class for Genre Validation
+class Genres(enum.Enum):
+    # Genre selections
+    Alternative ='Alternative'
+    Blues = 'Blues'
+    Classical = 'Classical'
+    Country = 'Country'
+    Electronic ='Electronic'
+    Folk ='Folk'
+    Funk = 'Funk'
+    Hip_Hop ='Hip-Hop'
+    Heavy_Metal ='Heavy-Metal'
+    Instrumental ='Instrumental'
+    Jazz = 'Jazz'
+    Musical_Theatre = 'Musical Theatre'
+    Pop ='Pop'
+    Punk = 'Punk'
+    RNB ='R&B'
+    Reggae = 'Reggae'
+    Rock_n_Roll = 'Rock n Roll'
+    Soul = 'Soul'
+    Other = 'Other'
+     # choices method 
+    @classmethod
+    def choices(cls):
+        return [(choice.name, choice.value) for choice in cls]
 
+# Venue Form Fields
 class VenueForm(Form):
     name = StringField(
         'name', validators=[DataRequired()]
@@ -91,27 +121,7 @@ class VenueForm(Form):
     genres = SelectMultipleField(
         # TODO implement enum restriction
         'genres', validators=[DataRequired()],
-        choices=[
-            ('Alternative', 'Alternative'),
-            ('Blues', 'Blues'),
-            ('Classical', 'Classical'),
-            ('Country', 'Country'),
-            ('Electronic', 'Electronic'),
-            ('Folk', 'Folk'),
-            ('Funk', 'Funk'),
-            ('Hip-Hop', 'Hip-Hop'),
-            ('Heavy Metal', 'Heavy Metal'),
-            ('Instrumental', 'Instrumental'),
-            ('Jazz', 'Jazz'),
-            ('Musical Theatre', 'Musical Theatre'),
-            ('Pop', 'Pop'),
-            ('Punk', 'Punk'),
-            ('R&B', 'R&B'),
-            ('Reggae', 'Reggae'),
-            ('Rock n Roll', 'Rock n Roll'),
-            ('Soul', 'Soul'),
-            ('Other', 'Other'),
-        ]
+        choices=Genres.choices()
     )
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
@@ -191,40 +201,25 @@ class ArtistForm(Form):
             ('WY', 'WY'),
         ]
     )
+    def validate_phone_number(form,field):
+        phone_num = '^([0-9]{3}[-][0-9]{3}[-][0-9]{4}$'
+        us_phone_format = re.search(phone_num, field.data)
+        if not us_phone_format:
+            raise ValidationErr('Error, your phone number does not match the format xxx-xxx-xxxx')
     phone = StringField(
         # TODO implement validation logic for phone 
-        'phone'
+        'phone', validators=[validate_phone_number]
     )
     image_link = StringField(
         'image_link'
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
-        choices=[
-            ('Alternative', 'Alternative'),
-            ('Blues', 'Blues'),
-            ('Classical', 'Classical'),
-            ('Country', 'Country'),
-            ('Electronic', 'Electronic'),
-            ('Folk', 'Folk'),
-            ('Funk', 'Funk'),
-            ('Hip-Hop', 'Hip-Hop'),
-            ('Heavy Metal', 'Heavy Metal'),
-            ('Instrumental', 'Instrumental'),
-            ('Jazz', 'Jazz'),
-            ('Musical Theatre', 'Musical Theatre'),
-            ('Pop', 'Pop'),
-            ('Punk', 'Punk'),
-            ('R&B', 'R&B'),
-            ('Reggae', 'Reggae'),
-            ('Rock n Roll', 'Rock n Roll'),
-            ('Soul', 'Soul'),
-            ('Other', 'Other'),
-        ]
+        choices=Genres.choices()
      )
     facebook_link = StringField(
         # TODO implement enum restriction
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[URL('https://www.facebook.com/')]
      )
 
     website_link = StringField(
